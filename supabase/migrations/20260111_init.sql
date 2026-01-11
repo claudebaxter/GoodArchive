@@ -32,6 +32,17 @@ as $$
   select auth.uid()
 $$;
 
+-- ======================
+-- Tables
+-- ======================
+
+-- Minimal roles table (owner/moderator). Seed the first owner manually via SQL or Supabase dashboard.
+create table if not exists public.user_roles (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  role text not null check (role in ('owner','moderator')),
+  created_at timestamptz not null default now()
+);
+
 create or replace function public.is_owner()
 returns boolean
 language sql
@@ -68,17 +79,6 @@ set search_path = public
 as $$
   select public.is_moderator();
 $$;
-
--- ======================
--- Tables
--- ======================
-
--- Minimal roles table (owner/moderator). Seed the first owner manually via SQL or Supabase dashboard.
-create table if not exists public.user_roles (
-  user_id uuid primary key references auth.users(id) on delete cascade,
-  role text not null check (role in ('owner','moderator')),
-  created_at timestamptz not null default now()
-);
 
 -- Moderator access requests
 create table if not exists public.moderator_requests (
