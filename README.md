@@ -1,36 +1,116 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GoodArchive
 
-## Getting Started
+GoodArchive is a public documentation platform for preserving and organizing examples of extremist, violent, and anti-social rhetoric that appear in open online spaces.
 
-First, run the development server:
+The goal is not to shame, harass, or incite retaliation —  
+The goal is to **document reality**.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+History is shaped by what people choose to remember.  
+This project exists so future generations can see what was said, who said it, and how it was normalized.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Mission
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+GoodArchive exists to:
 
-## Learn More
+• Preserve public evidence of harmful rhetoric  
+• Create an accessible historical record  
+• Enable research, analysis, and accountability  
+• Prevent collective amnesia  
+• Expose patterns, not individuals for harassment  
 
-To learn more about Next.js, take a look at the following resources:
+This is a **documentation project**, not an activist campaign.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## What This Is Not
 
-## Deploy on Vercel
+GoodArchive does **not**:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+• Encourage harassment  
+• Promote doxxing  
+• Coordinate retaliation  
+• Contact employers or families  
+• Organize brigades or campaigns  
+• Interfere in private lives  
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+All submissions must be **publicly available content**.
+
+What third parties choose to do with publicly visible information is outside the scope of this project.
+
+---
+
+## Why This Matters
+
+Extremism thrives when memory fades.
+
+Public rhetoric becomes normalized when it goes unrecorded.  
+Violence becomes minimized when its roots are ignored.  
+History becomes distorted when evidence disappears.
+
+GoodArchive exists to preserve **what was said**, **where it was said**, and **how often it was said**.
+
+Documentation is not cruelty.  
+Silence is.
+
+---
+
+## How the Platform Works
+
+• Anyone can submit publicly available material  
+• Submissions are reviewed before being published  
+• Approved entries appear in the public feed and search  
+• Moderators control visibility  
+• Sensitive metadata is isolated and protected  
+
+The platform prioritizes:
+
+• Accuracy  
+• Context  
+• Public sourcing  
+• Security  
+• Non-interference  
+
+---
+
+## Legal & Ethical Scope
+
+All content must be:
+
+• Public  
+• Lawfully accessible  
+• Non-private  
+• Non-hacked  
+• Non-leaked  
+
+No private data.  
+No unlawful material.  
+No coercion.
+
+This project documents speech — it does not participate in it.
+
+---
+
+## Contributing
+
+If you believe:
+
+• Documentation matters  
+• Memory matters  
+• Accountability matters  
+• History should be preserved  
+
+Then you are welcome to contribute.
+
+This project is open source by design.
+
+---
+
+## Final Note
+
+GoodArchive is not about moral superiority.
+
+It is about **record keeping**.
+
+History is written by those who save the receipts.
