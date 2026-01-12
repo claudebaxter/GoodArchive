@@ -3,6 +3,8 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { approveEntry, rejectEntry } from "./actions";
 import LogoutButton from "@/components/auth/LogoutButton";
 import { createClient } from "@supabase/supabase-js";
+import ActionButton from "@/components/dashboard/ActionButton";
+import { getSignedScreenshotUrl } from "@/lib/supabase/signedUrl";
 
 export default async function DashboardPage() {
   const supabase = await createServerSupabaseClient();
@@ -40,6 +42,12 @@ if (roleErr || !roleRow || (roleRow.role !== "owner" && roleRow.role !== "modera
     .select("id, platform, public_handle, permalink, screenshot_url, created_at")
     .eq("status", "pending")
     .order("created_at", { ascending: false });
+  const withSigned = await Promise.all(
+    (pending || []).map(async (e: any) => ({
+      ...e,
+      screenshotSigned: await getSignedScreenshotUrl(e.screenshot_url),
+    }))
+  );
 
   return (
     <main style={{ maxWidth: 720, margin: "3rem auto", padding: "0 1rem" }}>
@@ -51,11 +59,11 @@ if (roleErr || !roleRow || (roleRow.role !== "owner" && roleRow.role !== "modera
 
       <section style={{ marginTop: "2rem" }}>
         <h2>Pending entries</h2>
-        {!pending || pending.length === 0 ? (
+        {!withSigned || withSigned.length === 0 ? (
           <p>No pending entries.</p>
         ) : (
           <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-            {pending.map((e) => (
+            {withSigned.map((e) => (
               <li
                 key={e.id}
                 style={{
@@ -77,12 +85,17 @@ if (roleErr || !roleRow || (roleRow.role !== "owner" && roleRow.role !== "modera
                     {new Date(e.created_at as any).toLocaleString()}
                   </span>
                 </div>
+                {e.screenshotSigned && (
+                  <div>
+                    <img src={e.screenshotSigned} alt="screenshot" style={{ maxWidth: "100%", height: "auto", border: "1px solid #eee" }} />
+                  </div>
+                )}
                 <div style={{ display: "flex", gap: "0.5rem" }}>
                   <form action={approveEntry.bind(null, e.id)}>
-                    <button type="submit">Approve</button>
+                    <ActionButton pendingText="Approving…">Approve</ActionButton>
                   </form>
                   <form action={rejectEntry.bind(null, e.id)}>
-                    <button type="submit">Reject</button>
+                    <ActionButton pendingText="Rejecting…">Reject</ActionButton>
                   </form>
                 </div>
               </li>

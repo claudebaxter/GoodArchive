@@ -7,7 +7,6 @@ const MAX_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED: Record<string, string> = {
   "image/png": "png",
   "image/jpeg": "jpg",
-  "image/webp": "webp",
 };
 
 export async function ensureScreenshotsBucket() {

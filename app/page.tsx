@@ -22,7 +22,7 @@ export default function HomePage() {
       .split(",")
       .map((t) => t.trim())
       .filter(Boolean);
-    const payload = {
+    const payload: any = {
       platform: String(form.get("platform") || ""),
       public_handle: String(form.get("public_handle") || ""),
       display_name: form.get("display_name")
@@ -32,6 +32,18 @@ export default function HomePage() {
       tags,
       note: form.get("note") ? String(form.get("note")) : undefined,
     };
+    // Optional screenshot upload first
+    const file = (form.get("screenshot") as File | null) || null;
+    if (file && file.size > 0) {
+      const fd = new FormData();
+      fd.append("file", file);
+      const up = await fetch("/api/screenshots", { method: "POST", body: fd });
+      const upJson = await up.json();
+      if (!up.ok) {
+        throw new Error(upJson?.error || "screenshot_upload_failed");
+      }
+      payload.screenshot_path = upJson.key;
+    }
     try {
       const res = await fetch("/api/entries", {
         method: "POST",
@@ -79,6 +91,31 @@ export default function HomePage() {
           <input type="url" name="permalink" placeholder="https://..." required />
         </label>
         <label style={{ display: "grid", gap: "0.25rem" }}>
+          <span>Screenshot (PNG or JPEG, max 10MB)</span>
+          <input
+            type="file"
+            name="screenshot"
+            accept="image/png,image/jpeg"
+            onChange={(ev) => {
+              const img = document.getElementById("preview-img") as HTMLImageElement | null;
+              if (!img) return;
+              const f = (ev.target as HTMLInputElement).files?.[0];
+              if (!f) {
+                img.src = "";
+                img.style.display = "none";
+                return;
+              }
+              const reader = new FileReader();
+              reader.onload = () => {
+                img.src = String(reader.result || "");
+                img.style.display = "block";
+              };
+              reader.readAsDataURL(f);
+            }}
+          />
+          <img id="preview-img" alt="preview" style={{ display: "none", marginTop: "0.5rem", maxWidth: "100%", height: "auto", border: "1px solid #eee" }} />
+        </label>
+        <label style={{ display: "grid", gap: "0.25rem" }}>
           <span>Tags (comma-separated)</span>
           <input name="tags" placeholder="politics, rhetoric" />
         </label>
@@ -86,6 +123,9 @@ export default function HomePage() {
           <span>Note (optional)</span>
           <textarea name="note" rows={3} />
         </label>
+        <small style={{ color: "#555" }}>
+          Please provide readable screenshots. Unreadable screenshots may be rejected.
+        </small>
         <button type="submit" disabled={state.status === "submitting"}>
           {state.status === "submitting" ? "Submitting…" : "Submit"}
         </button>
