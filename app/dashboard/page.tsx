@@ -33,7 +33,9 @@ if (roleErr || !roleRow || (roleRow.role !== "owner" && roleRow.role !== "modera
 }
 
 
-  const { data: pending } = await supabase
+  // Use admin for listing pending to avoid RLS false-negatives;
+  // page access is already restricted to staff above.
+  const { data: pending } = await admin
     .from("entries")
     .select("id, platform, public_handle, permalink, screenshot_url, created_at")
     .eq("status", "pending")
