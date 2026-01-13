@@ -29,6 +29,8 @@ export default async function FeedPage({
     }))
   );
 
+  console.log("[/feed] params", { page, limit, got: withSigned.length });
+
   return (
     <main style={{ maxWidth: 800, margin: "2rem auto", padding: "0 1rem" }}>
       <nav style={{ marginBottom: "1rem", display: "flex", gap: "0.75rem" }}>

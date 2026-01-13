@@ -24,11 +24,11 @@ export const submissionSchema = z.object({
   permalink: z.string().url().max(2048),
   posted_at: z.coerce.date().optional(),
   tags: z
-    .array(z.string().trim().min(1).max(40))
-    .max(12)
+    .array(z.string().trim().min(1).max(60))
+    .max(20)
     .optional()
     .default([]),
-  note: z.string().trim().max(600).optional(),
+  note: z.string().trim().max(2000).optional(),
 });
 
 export type SubmissionInput = z.infer<typeof submissionSchema>;

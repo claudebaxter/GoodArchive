@@ -17,8 +17,26 @@ export async function POST(req: NextRequest) {
     });
     const parsed = createEntrySchema.safeParse(body);
     if (!parsed.success) {
+      // Extra debug info for local dev
+      const dbg = {
+        received: {
+          platform: body?.platform,
+          public_handle: body?.public_handle,
+          permalink: body?.permalink,
+          tags: Array.isArray(body?.tags) ? body.tags.length : undefined,
+          note_len: typeof body?.note === "string" ? body.note.length : undefined,
+          screenshot_path_len:
+            typeof body?.screenshot_path === "string" ? body.screenshot_path.length : undefined,
+          screenshot_url_len:
+            typeof body?.screenshot_url === "string" ? body.screenshot_url.length : undefined,
+        },
+      };
+      console.error("[/api/entries] validation_error", {
+        issues: parsed.error.issues,
+        ...dbg,
+      });
       return NextResponse.json(
-        { error: "validation_error", details: parsed.error.flatten() },
+        { error: "validation_error", details: parsed.error.flatten(), ...dbg },
         { status: 422 }
       );
     }
