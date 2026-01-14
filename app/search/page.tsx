@@ -59,45 +59,37 @@ export default async function SearchPage({
   console.log("[/search] params", { q, platform, tag, page, limit, got: (withSigned || []).length });
 
   return (
-    <main style={{ maxWidth: 800, margin: "2rem auto", padding: "0 1rem" }}>
-      <nav style={{ marginBottom: "1rem", display: "flex", gap: "0.75rem" }}>
-        <Link href="/">Submit</Link>
-        <Link href="/feed">Feed</Link>
-        <Link href="/search">Search</Link>
-        <Link href="/dashboard">Dashboard</Link>
-      </nav>
-      <h1>Search</h1>
-      <form method="get" style={{ display: "grid", gap: "0.5rem", marginTop: "1rem" }}>
+    <main>
+      <h1 className="page-title">Search</h1>
+      <form method="get" className="form-grid" style={{ marginTop: "1rem" }}>
         <input name="q" placeholder="Query" defaultValue={q} />
         <input name="platform" placeholder="Platform (optional)" defaultValue={platform} />
         <input name="tag" placeholder="Tag (optional)" defaultValue={tag} />
-        <button type="submit">Search</button>
+        <div className="actions">
+          <button className="btn btn-primary" type="submit">Search</button>
+        </div>
       </form>
 
-      <ul style={{ listStyle: "none", padding: 0, marginTop: "1rem" }}>
+      <div style={{ marginTop: "1rem" }}>
         {withSigned.map((e) => (
-          <li key={e.id} style={{ borderBottom: "1px solid #eee", padding: "0.75rem 0" }}>
-            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
+          <div key={e.id} className="card">
+            <div className="card-header">
               <strong>{e.platform}</strong>
-              <span>@{e.public_handle}</span>
+              <span>{e.public_handle}</span>
               {e.display_name && <span>({e.display_name})</span>}
               <a href={e.permalink} target="_blank" rel="noreferrer">Link</a>
-              <span style={{ marginLeft: "auto", color: "#666" }}>
+              <span className="muted" style={{ marginLeft: "auto" }}>
                 {new Date(e.created_at as any).toLocaleString()}
               </span>
             </div>
-            {e.screenshotSigned && (
-              <div style={{ marginTop: "0.5rem" }}>
-                <img src={e.screenshotSigned} alt="screenshot" style={{ maxWidth: "100%", height: "auto", border: "1px solid #eee" }} />
-              </div>
-            )}
+            {e.screenshotSigned && <img className="entry-image" src={e.screenshotSigned} alt="screenshot" />}
             {!!e.tags?.length && (
-              <div style={{ color: "#555" }}>tags: {(e.tags as string[]).join(", ")}</div>
+              <div className="muted" style={{ marginTop: "0.5rem" }}>tags: {(e.tags as string[]).join(", ")}</div>
             )}
-          </li>
+          </div>
         ))}
-      </ul>
-      <div style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}>
+      </div>
+      <div className="actions" style={{ marginTop: "1rem" }}>
         {page > 1 && (
           <Link href={`/search?q=${encodeURIComponent(q)}&platform=${encodeURIComponent(platform)}&tag=${encodeURIComponent(tag)}&page=${page - 1}`}>
             Previous

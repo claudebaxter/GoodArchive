@@ -62,35 +62,28 @@ export default function HomePage() {
   }
 
   return (
-    <main style={{ maxWidth: 720, margin: "2rem auto", padding: "0 1rem" }}>
-      <nav style={{ marginBottom: "1rem", display: "flex", gap: "0.75rem" }}>
-        <Link href="/">Submit</Link>
-        <Link href="/feed">Feed</Link>
-        <Link href="/search">Search</Link>
-        <Link href="/dashboard">Dashboard</Link>
-      </nav>
-      <h1>Submit a public entry</h1>
-      <p style={{ color: "#555" }}>
-        Submit public links only. Private data is not accepted.
-      </p>
-      <form onSubmit={onSubmit} style={{ display: "grid", gap: "0.75rem", marginTop: "1rem" }}>
-        <label style={{ display: "grid", gap: "0.25rem" }}>
+    <main>
+      <h1 className="page-title">Submit a public entry</h1>
+      <p className="muted">Submit public links only. Private data is not accepted.</p>
+      <div className="card form-card">
+      <form onSubmit={onSubmit} className="form-grid">
+        <label>
           <span>Platform</span>
           <input name="platform" placeholder="twitter" required />
         </label>
-        <label style={{ display: "grid", gap: "0.25rem" }}>
+        <label>
           <span>Public handle</span>
           <input name="public_handle" placeholder="exampleuser" required />
         </label>
-        <label style={{ display: "grid", gap: "0.25rem" }}>
+        <label>
           <span>Display name (optional)</span>
           <input name="display_name" placeholder="Example User" />
         </label>
-        <label style={{ display: "grid", gap: "0.25rem" }}>
+        <label>
           <span>Permalink</span>
           <input type="url" name="permalink" placeholder="https://..." required />
         </label>
-        <label style={{ display: "grid", gap: "0.25rem" }}>
+        <label className="full">
           <span>Screenshot (PNG or JPEG, max 10MB)</span>
           <input
             type="file"
@@ -115,21 +108,26 @@ export default function HomePage() {
           />
           <img id="preview-img" alt="preview" style={{ display: "none", marginTop: "0.5rem", maxWidth: "100%", height: "auto", border: "1px solid #eee" }} />
         </label>
-        <label style={{ display: "grid", gap: "0.25rem" }}>
+        <label>
           <span>Tags (comma-separated)</span>
           <input name="tags" placeholder="politics, rhetoric" />
         </label>
-        <label style={{ display: "grid", gap: "0.25rem" }}>
+        <label className="full">
           <span>Note (optional)</span>
           <textarea name="note" rows={3} />
         </label>
-        <small style={{ color: "#555" }}>
-          Please provide readable screenshots. Unreadable screenshots may be rejected.
-        </small>
-        <button type="submit" disabled={state.status === "submitting"}>
-          {state.status === "submitting" ? "Submitting…" : "Submit"}
-        </button>
+        <div className="full">
+          <small className="muted">
+            Please provide readable screenshots. Unreadable screenshots may be rejected.
+          </small>
+        </div>
+        <div className="full">
+          <button className="btn btn-primary" type="submit" disabled={state.status === "submitting"}>
+            {state.status === "submitting" ? "Submitting…" : "Submit"}
+          </button>
+        </div>
       </form>
+      </div>
       {state.status === "success" && (
         <p style={{ color: "green", marginTop: "0.75rem" }}>
           Submitted. Entry id: {state.id}

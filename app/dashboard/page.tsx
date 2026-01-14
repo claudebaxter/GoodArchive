@@ -50,57 +50,47 @@ if (roleErr || !roleRow || (roleRow.role !== "owner" && roleRow.role !== "modera
   );
 
   return (
-    <main style={{ maxWidth: 720, margin: "3rem auto", padding: "0 1rem" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h1>Dashboard</h1>
+    <main>
+      <div className="card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div>
+          <h1 className="page-title" style={{ margin: 0 }}>Dashboard</h1>
+          <p className="muted" style={{ marginTop: "0.25rem" }}>Welcome, {user.email}</p>
+        </div>
         <LogoutButton />
       </div>
-      <p>Welcome, {user.email}</p>
 
-      <section style={{ marginTop: "2rem" }}>
-        <h2>Pending entries</h2>
+      <section style={{ marginTop: "1rem" }}>
+        <h2 style={{ margin: "0.5rem 0" }}>Pending entries</h2>
         {!withSigned || withSigned.length === 0 ? (
-          <p>No pending entries.</p>
+          <p className="muted">No pending entries.</p>
         ) : (
-          <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+          <div>
             {withSigned.map((e) => (
-              <li
-                key={e.id}
-                style={{
-                  border: "1px solid #ddd",
-                  borderRadius: 8,
-                  padding: "0.75rem",
-                  marginTop: "0.75rem",
-                  display: "grid",
-                  gap: "0.5rem",
-                }}
-              >
-                <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
+              <div key={e.id} className="card">
+                <div className="card-header">
                   <strong>{e.platform}</strong>
-                  <span>@{e.public_handle}</span>
+                  <span>{e.public_handle}</span>
                   <a href={e.permalink} target="_blank" rel="noreferrer">
                     View
                   </a>
-                  <span style={{ color: "#666", marginLeft: "auto" }}>
+                  <span className="muted" style={{ marginLeft: "auto" }}>
                     {new Date(e.created_at as any).toLocaleString()}
                   </span>
                 </div>
                 {e.screenshotSigned && (
-                  <div>
-                    <img src={e.screenshotSigned} alt="screenshot" style={{ maxWidth: "100%", height: "auto", border: "1px solid #eee" }} />
-                  </div>
+                  <img className="entry-image" src={e.screenshotSigned} alt="screenshot" />
                 )}
-                <div style={{ display: "flex", gap: "0.5rem" }}>
+                <div className="actions" style={{ marginTop: "0.5rem" }}>
                   <form action={approveEntry.bind(null, e.id)}>
-                    <ActionButton pendingText="Approving…">Approve</ActionButton>
+                    <ActionButton pendingText="Approving…"><span className="btn btn-primary">Approve</span></ActionButton>
                   </form>
                   <form action={rejectEntry.bind(null, e.id)}>
-                    <ActionButton pendingText="Rejecting…">Reject</ActionButton>
+                    <ActionButton pendingText="Rejecting…"><span className="btn btn-danger">Reject</span></ActionButton>
                   </form>
                 </div>
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
         )}
       </section>
     </main>

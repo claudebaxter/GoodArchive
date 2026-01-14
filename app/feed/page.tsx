@@ -32,42 +32,32 @@ export default async function FeedPage({
   console.log("[/feed] params", { page, limit, got: withSigned.length });
 
   return (
-    <main style={{ maxWidth: 800, margin: "2rem auto", padding: "0 1rem" }}>
-      <nav style={{ marginBottom: "1rem", display: "flex", gap: "0.75rem" }}>
-        <Link href="/">Submit</Link>
-        <Link href="/feed">Feed</Link>
-        <Link href="/search">Search</Link>
-        <Link href="/dashboard">Dashboard</Link>
-      </nav>
-      <h1>Approved feed</h1>
+    <main>
+      <h1 className="page-title">Approved feed</h1>
       {withSigned.length === 0 ? (
-        <p style={{ color: "#666" }}>No approved entries yet.</p>
+        <p className="muted">No approved entries yet.</p>
       ) : (
-      <ul style={{ listStyle: "none", padding: 0, marginTop: "1rem" }}>
-        {withSigned.map((e) => (
-          <li key={e.id} style={{ borderBottom: "1px solid #eee", padding: "0.75rem 0" }}>
-            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
-              <strong>{e.platform}</strong>
-              <span>@{e.public_handle}</span>
-              {e.display_name && <span>({e.display_name})</span>}
-              <a href={e.permalink} target="_blank" rel="noreferrer">Link</a>
-              <span style={{ marginLeft: "auto", color: "#666" }}>
-                {new Date(e.created_at as any).toLocaleString()}
-              </span>
-            </div>
-            {e.screenshotSigned && (
-              <div style={{ marginTop: "0.5rem" }}>
-                <img src={e.screenshotSigned} alt="screenshot" style={{ maxWidth: "100%", height: "auto", border: "1px solid #eee" }} />
+        <div>
+          {withSigned.map((e) => (
+            <div key={e.id} className="card">
+              <div className="card-header">
+                <strong>{e.platform}</strong>
+                <span>{e.public_handle}</span>
+                {e.display_name && <span>({e.display_name})</span>}
+                <a href={e.permalink} target="_blank" rel="noreferrer">Link</a>
+                <span className="muted" style={{ marginLeft: "auto" }}>
+                  {new Date(e.created_at as any).toLocaleString()}
+                </span>
               </div>
-            )}
-            {!!e.tags?.length && (
-              <div style={{ color: "#555" }}>tags: {(e.tags as string[]).join(", ")}</div>
-            )}
-          </li>
-        ))}
-      </ul>
+              {e.screenshotSigned && <img className="entry-image" src={e.screenshotSigned} alt="screenshot" />}
+              {!!e.tags?.length && (
+                <div className="muted" style={{ marginTop: "0.5rem" }}>tags: {(e.tags as string[]).join(", ")}</div>
+              )}
+            </div>
+          ))}
+        </div>
       )}
-      <div style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}>
+      <div className="actions" style={{ marginTop: "1rem" }}>
         {page > 1 && <Link href={`/feed?page=${page - 1}`}>Previous</Link>}
         {(withSigned.length || 0) === limit && <Link href={`/feed?page=${page + 1}`}>Next</Link>}
       </div>
