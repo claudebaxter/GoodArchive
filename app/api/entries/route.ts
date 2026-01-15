@@ -3,13 +3,49 @@ import type { NextRequest } from "next/server";
 import { getAdminClient } from "@/lib/supabaseServer";
 import { submissionSchema } from "@/lib/validation";
 import { z } from "zod";
+import { getClientIp } from "@/lib/request";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
+    // Basic rate limit
+    const ip = getClientIp(req);
+    const rl = checkRateLimit(ip, { keyPrefix: "entries", limit: 10, windowMs: 10 * 60 * 1000 });
+    if (!rl.ok) {
+      return NextResponse.json({ error: "rate_limited" }, { status: 429 });
+    }
+
     const body = await req.json();
+
+    // hCaptcha verification (if configured)
+    const hcaptchaSecret = process.env.HCAPTCHA_SECRET;
+    if (hcaptchaSecret) {
+      const token = body?.hcaptcha_token;
+      if (!token) {
+        return NextResponse.json({ error: "captcha_required" }, { status: 400 });
+      }
+      try {
+        const verifyRes = await fetch("https://hcaptcha.com/siteverify", {
+          method: "POST",
+          headers: { "content-type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            secret: hcaptchaSecret,
+            response: token,
+            remoteip: ip,
+          }),
+        });
+        const verifyJson = await verifyRes.json();
+        if (!verifyJson.success) {
+          return NextResponse.json({ error: "captcha_failed" }, { status: 400 });
+        }
+      } catch {
+        return NextResponse.json({ error: "captcha_error" }, { status: 500 });
+      }
+    }
+
     // Accept optional screenshot_path (storage key) and screenshot_url (URL) with proper zod types
     const createEntrySchema = submissionSchema.extend({
       screenshot_url: z.string().url().optional(),

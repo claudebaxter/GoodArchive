@@ -1,12 +1,19 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { uploadScreenshotBlob } from "@/lib/storage";
+import { getClientIp } from "@/lib/request";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req);
+    const rl = checkRateLimit(ip, { keyPrefix: "screenshots", limit: 6, windowMs: 10 * 60 * 1000 });
+    if (!rl.ok) {
+      return NextResponse.json({ error: "rate_limited" }, { status: 429 });
+    }
     const ct = req.headers.get("content-type") || "";
     if (!ct.includes("multipart/form-data")) {
       return NextResponse.json({ error: "unsupported_content_type" }, { status: 415 });

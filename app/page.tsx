@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
+import Script from "next/script";
+import { usePathname } from "next/navigation";
 
 type SubmitState =
   | { status: "idle" }
@@ -11,11 +12,69 @@ type SubmitState =
 
 export default function HomePage() {
   const [state, setState] = React.useState<SubmitState>({ status: "idle" });
+  const siteKey = process.env.NEXT_PUBLIC_HCAPTCHA_SITEKEY;
+  const previewRef = React.useRef<HTMLImageElement | null>(null);
+  const captchaIdRef = React.useRef<string | number | null>(null);
+  const pathname = usePathname();
+
+  React.useEffect(() => {
+    if (!siteKey) return;
+    const el = document.getElementById("hcaptcha-container");
+    if (!el) return;
+    let attempts = 0;
+    let cancelled = false;
+
+    const renderWidget = () => {
+      if (cancelled) return false;
+      const hcaptcha = (window as any)?.hcaptcha;
+      if (!hcaptcha?.render) return false;
+      try {
+        if (captchaIdRef.current != null) {
+          hcaptcha.remove?.(captchaIdRef.current);
+          captchaIdRef.current = null;
+        }
+        el.innerHTML = "";
+        captchaIdRef.current = hcaptcha.render(el, { sitekey: siteKey }) ?? null;
+        return true;
+      } catch {
+        return false;
+      }
+    };
+
+    if (renderWidget()) return;
+
+    const interval = setInterval(() => {
+      attempts += 1;
+      if (renderWidget() || attempts > 20) {
+        clearInterval(interval);
+      }
+    }, 250);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+      try {
+        if (captchaIdRef.current != null) {
+          (window as any)?.hcaptcha?.remove?.(captchaIdRef.current);
+          captchaIdRef.current = null;
+        }
+      } catch {}
+    };
+  }, [siteKey, pathname]);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formEl = e.currentTarget; // capture before any awaits (React pools events)
     setState({ status: "submitting" });
+    const siteKey = process.env.NEXT_PUBLIC_HCAPTCHA_SITEKEY;
+    let hcaptchaToken: string | undefined;
+    try {
+      hcaptchaToken = (window as any)?.hcaptcha?.getResponse?.() || undefined;
+    } catch {}
+    if (siteKey && !hcaptchaToken) {
+      setState({ status: "error", message: "captcha_required" });
+      return;
+    }
     const form = new FormData(formEl);
     const tagsInput = String(form.get("tags") || "");
     const tags = tagsInput
@@ -32,11 +91,15 @@ export default function HomePage() {
       tags,
       note: form.get("note") ? String(form.get("note")) : undefined,
     };
+    if (siteKey && hcaptchaToken) {
+      payload.hcaptcha_token = hcaptchaToken;
+    }
     // Optional screenshot upload first
     const file = (form.get("screenshot") as File | null) || null;
     if (file && file.size > 0) {
       const fd = new FormData();
       fd.append("file", file);
+      // Do not send captcha token here; token is verified on /api/entries
       const up = await fetch("/api/screenshots", { method: "POST", body: fd });
       const upJson = await up.json();
       if (!up.ok) {
@@ -56,13 +119,29 @@ export default function HomePage() {
       }
       setState({ status: "success", id: data.id });
       formEl.reset();
+      if (previewRef.current) {
+        previewRef.current.src = "";
+        previewRef.current.style.display = "none";
+      }
     } catch (err: any) {
       setState({ status: "error", message: err?.message || "submit_failed" });
+    } finally {
+      try {
+        if (siteKey) (window as any)?.hcaptcha?.reset?.();
+      } catch {}
     }
   }
 
   return (
     <main>
+      {siteKey && (
+        <Script
+          src="https://hcaptcha.com/1/api.js?render=explicit"
+          async
+          defer
+          strategy="afterInteractive"
+        />
+      )}
       <h1 className="page-title">Submit a public entry</h1>
       <p className="muted">Submit public links only. Private data is not accepted.</p>
       <div className="card form-card">
@@ -90,7 +169,7 @@ export default function HomePage() {
             name="screenshot"
             accept="image/png,image/jpeg"
             onChange={(ev) => {
-              const img = document.getElementById("preview-img") as HTMLImageElement | null;
+              const img = previewRef.current;
               if (!img) return;
               const f = (ev.target as HTMLInputElement).files?.[0];
               if (!f) {
@@ -106,7 +185,12 @@ export default function HomePage() {
               reader.readAsDataURL(f);
             }}
           />
-          <img id="preview-img" alt="preview" style={{ display: "none", marginTop: "0.5rem", maxWidth: "100%", height: "auto", border: "1px solid #eee" }} />
+          <img
+            ref={previewRef}
+            id="preview-img"
+            alt="preview"
+            style={{ display: "none", marginTop: "0.5rem", maxWidth: "100%", height: "auto", border: "1px solid #eee" }}
+          />
         </label>
         <label>
           <span>Tags (comma-separated)</span>
@@ -116,6 +200,11 @@ export default function HomePage() {
           <span>Note (optional)</span>
           <textarea name="note" rows={3} />
         </label>
+        {siteKey && (
+          <div className="full" style={{ marginTop: "0.25rem" }}>
+            <div id="hcaptcha-container" className="h-captcha"></div>
+          </div>
+        )}
         <div className="full">
           <small className="muted">
             Please provide readable screenshots. Unreadable screenshots may be rejected.
