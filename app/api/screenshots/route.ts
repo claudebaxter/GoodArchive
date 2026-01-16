@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export async function POST(req: NextRequest) {
   try {
     const ip = getClientIp(req);
-    const rl = checkRateLimit(ip, { keyPrefix: "screenshots", limit: 6, windowMs: 10 * 60 * 1000 });
+    const rl = await checkRateLimit(ip, { keyPrefix: "screenshots", limit: 6, windowMs: 10 * 60 * 1000 });
     if (!rl.ok) {
       return NextResponse.json({ error: "rate_limited" }, { status: 429 });
     }

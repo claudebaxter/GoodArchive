@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
   try {
     // Basic rate limit
     const ip = getClientIp(req);
-    const rl = checkRateLimit(ip, { keyPrefix: "entries", limit: 10, windowMs: 10 * 60 * 1000 });
+    const rl = await checkRateLimit(ip, { keyPrefix: "entries", limit: 10, windowMs: 10 * 60 * 1000 });
     if (!rl.ok) {
       return NextResponse.json({ error: "rate_limited" }, { status: 429 });
     }
@@ -22,6 +22,10 @@ export async function POST(req: NextRequest) {
 
     // hCaptcha verification (if configured)
     const hcaptchaSecret = process.env.HCAPTCHA_SECRET;
+    const hcaptchaSitekey = process.env.NEXT_PUBLIC_HCAPTCHA_SITEKEY;
+    if (hcaptchaSitekey && !hcaptchaSecret) {
+      return NextResponse.json({ error: "captcha_misconfigured" }, { status: 500 });
+    }
     if (hcaptchaSecret) {
       const token = body?.hcaptcha_token;
       if (!token) {
@@ -103,8 +107,9 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ id: entry.id, status: "pending" }, { status: 201 });
-  } catch {
+  } catch (err: any) {
+    console.error("[api/entries] server_error", err?.message, err?.stack ?? err);
     return NextResponse.json({ error: "server_error" }, { status: 500 });
-  }
+  }  
 }
 
