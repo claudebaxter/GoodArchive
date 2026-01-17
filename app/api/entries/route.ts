@@ -20,13 +20,19 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
 
-    // hCaptcha verification (if configured)
+    // hCaptcha verification (or submission token) if configured
     const hcaptchaSecret = process.env.HCAPTCHA_SECRET;
     const hcaptchaSitekey = process.env.NEXT_PUBLIC_HCAPTCHA_SITEKEY;
     if (hcaptchaSitekey && !hcaptchaSecret) {
       return NextResponse.json({ error: "captcha_misconfigured" }, { status: 500 });
     }
-    if (hcaptchaSecret) {
+    const submissionToken = body?.submission_token;
+    let usedSubmissionToken = false;
+    if (submissionToken && typeof submissionToken === "string") {
+      const ok = await (await import("@/lib/uploadToken")).consumeSubmissionToken(submissionToken);
+      usedSubmissionToken = ok;
+    }
+    if (!usedSubmissionToken && hcaptchaSecret) {
       const token = body?.hcaptcha_token;
       if (!token) {
         return NextResponse.json({ error: "captcha_required" }, { status: 400 });

@@ -97,15 +97,30 @@ export default function HomePage() {
     // Optional screenshot upload first
     const file = (form.get("screenshot") as File | null) || null;
     if (file && file.size > 0) {
-      const fd = new FormData();
-      fd.append("file", file);
-      // Do not send captcha token here; token is verified on /api/entries
-      const up = await fetch("/api/screenshots", { method: "POST", body: fd });
-      const upJson = await up.json();
-      if (!up.ok) {
-        throw new Error(upJson?.error || "screenshot_upload_failed");
+      // Request a signed upload URL after captcha verification
+      const upReq = await fetch("/api/upload-url", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          hcaptcha_token: hcaptchaToken,
+          mime: file.type,
+          size: file.size,
+        }),
+      });
+      const upJson = await upReq.json();
+      if (!upReq.ok) {
+        throw new Error(upJson?.error || "upload_url_failed");
       }
-      payload.screenshot_path = upJson.key;
+      const putRes = await fetch(upJson.signedUrl, {
+        method: "PUT",
+        headers: { "content-type": file.type },
+        body: file,
+      });
+      if (!putRes.ok) {
+        throw new Error("upload_failed");
+      }
+      payload.screenshot_path = upJson.path;
+      payload.submission_token = upJson.submission_token;
     }
     try {
       const res = await fetch("/api/entries", {
